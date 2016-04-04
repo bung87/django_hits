@@ -2,7 +2,10 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.contenttypes import generic
+if (hasattr(django,"version") and django.version > 1.8) or (hasattr(django,"get_version") and django.get_version()):
+    from django.contrib.contenttypes.fields import GenericForeignKey
+else:
+    from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from datetime import datetime, timedelta
@@ -41,7 +44,7 @@ class HitManager(models.Manager):
 class Hit(models.Model):
     content_type = models.ForeignKey(ContentType, null=True)
     object_pk = models.CharField(max_length=50)  # TextField not possible, because unique_together is needed, must be enough
-    content_object = generic.GenericForeignKey(ct_field="content_type", fk_field="object_pk")
+    content_object = GenericForeignKey(ct_field="content_type", fk_field="object_pk")
 
     bucket = models.CharField(max_length=50, blank=True, null=True)  # Each object may have multiple buckets hits get counted in
 
