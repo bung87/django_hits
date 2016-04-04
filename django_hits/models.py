@@ -5,8 +5,10 @@ from django.contrib.auth.models import User
 import django
 if (hasattr(django,"version") and django.version > 1.8) or (hasattr(django,"get_version") and django.get_version()):
     from django.contrib.contenttypes.fields import GenericForeignKey
+    from django.db.transaction import atomic
 else:
     from django.contrib.contenttypes.generic import GenericForeignKey
+    from django.db.transaction import commit_manually as atomic
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from datetime import datetime, timedelta
@@ -55,7 +57,7 @@ class Hit(models.Model):
     objects = HitManager()
 
     # TODO: Transaction-Management needed?
-    @transaction.commit_manually
+    @atomic
     def hit(self, user, ip):
         from django.db import backend
         if self.has_hit_from(user, ip):
