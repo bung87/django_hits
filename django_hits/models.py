@@ -2,6 +2,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth.models import User
+import django
 if (hasattr(django,"version") and django.version > 1.8) or (hasattr(django,"get_version") and django.get_version()):
     from django.contrib.contenttypes.fields import GenericForeignKey
 else:
