@@ -102,7 +102,7 @@ class Hit(models.Model):
 class HitLog(models.Model):
     hit = models.ForeignKey(Hit, related_name='log')
     user = models.ForeignKey(User, related_name='hits_log', null=True)
-    ip = models.IPAddressField(null=True)
+    ip = models.GenericIPAddressField(null=True) if has_attr(models,"GenericIPAddressField") else models.IPAddressField(null=True) 
     when = models.DateTimeField(default=datetime.now)
 
     class Meta:
