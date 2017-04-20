@@ -10,7 +10,7 @@ setup(
     #long_description=open('README.rst', 'r').read(),
     packages = [
         'django_hits',
-        'django_hits.migrations',
+        'django_hits.south_migrations',
         'django_hits.templatetags',
     ],
     install_requires = [
