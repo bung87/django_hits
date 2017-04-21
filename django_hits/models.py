@@ -57,27 +57,28 @@ class Hit(models.Model):
     objects = HitManager()
 
     # TODO: Transaction-Management needed?
-    @atomic
+    # @atomic
     def hit(self, user, ip):
 
         if self.has_hit_from(user, ip):
             self.update_hit_from(user, ip)
             Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1)
             self.views += 1
-            transaction.commit()
+            # transaction.commit()
             return True
         try:
             self.log.create(user=user, ip=ip)
-        except IntegrityError: # catch race condition
+        except IntegrityError as e: # catch race condition
+            raise e
             # log-extry was already created
             # happens when users double-click or reload to fast
             # (we ignore this)
-            transaction.rollback()
+            # transaction.rollback()
             return False
         Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1, visits=models.F('visits') + 1)
         self.views += 1
         self.visits += 1
-        transaction.commit()
+        # transaction.commit()
         return True
 
     def has_hit_from(self, user, ip):
