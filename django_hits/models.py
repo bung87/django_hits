@@ -10,7 +10,7 @@ else:
     from django.contrib.contenttypes.generic import GenericForeignKey
     from django.db.transaction import commit_manually as atomic
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
+from django.db import transaction,IntegrityError
 from datetime import datetime, timedelta
 
 from django.db.models import signals
@@ -18,7 +18,7 @@ from django.db.models import signals
 
 class HitManager(models.Manager):
     def get_for(self, obj, bucket=None):
-        from django.db import backend
+
         if bucket is None:
             bucket_kwargs = {'bucket__isnull': True}
         else:
@@ -28,12 +28,12 @@ class HitManager(models.Manager):
             object_pk = getattr(obj, obj._meta.pk.column)
             try:
                 return self.get_or_create(content_type=content_type, object_pk=object_pk, **bucket_kwargs)[0]
-            except backend.IntegrityError:  # catch race condition
+            except IntegrityError:  # catch race condition
                 return self.get(content_type=content_type, object_pk=object_pk, **bucket_kwargs)
         elif isinstance(obj, (str, unicode)):
             try:
                 return self.get_or_create(content_type__isnull=True, object_pk=obj, **bucket_kwargs)[0]
-            except backend.IntegrityError: # catch race condition
+            except IntegrityError: # catch race condition
                 return self.get(content_type__isnull=True, object_pk=obj, **bucket_kwargs)
         else:
             raise Exception("Don't know what to do with this obj!?")
@@ -59,7 +59,7 @@ class Hit(models.Model):
     # TODO: Transaction-Management needed?
     @atomic
     def hit(self, user, ip):
-        from django.db import backend
+
         if self.has_hit_from(user, ip):
             self.update_hit_from(user, ip)
             Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1)
@@ -68,7 +68,7 @@ class Hit(models.Model):
             return True
         try:
             self.log.create(user=user, ip=ip)
-        except backend.IntegrityError: # catch race condition
+        except IntegrityError: # catch race condition
             # log-extry was already created
             # happens when users double-click or reload to fast
             # (we ignore this)
