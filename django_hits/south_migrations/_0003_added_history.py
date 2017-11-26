@@ -3,7 +3,8 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-
+from django.utils import timezone
+now = timezone.now
 
 class Migration(SchemaMigration):
 
@@ -12,7 +13,7 @@ class Migration(SchemaMigration):
         db.create_table(u'django_hits_hithistory', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('hit', self.gf('django.db.models.fields.related.ForeignKey')(related_name='history', to=orm['django_hits.Hit'])),
-            ('when', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
+            ('when', self.gf('django.db.models.fields.DateTimeField')(default=now)),
             ('views', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
             ('visits', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
             ('views_change', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
@@ -42,7 +43,7 @@ class Migration(SchemaMigration):
         },
         u'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Group']"}),
@@ -50,7 +51,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'user_set'", 'blank': 'True', 'to': u"orm['auth.Permission']"}),
@@ -80,7 +81,7 @@ class Migration(SchemaMigration):
             'views_change': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'visits': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'visits_change': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
-            'when': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
+            'when': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'})
         },
         u'django_hits.hitlog': {
             'Meta': {'unique_together': "(('hit', 'user', 'ip'),)", 'object_name': 'HitLog'},
@@ -88,7 +89,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ip': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hits_log'", 'null': 'True', 'to': u"orm['auth.User']"}),
-            'when': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
+            'when': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'})
         }
     }
 

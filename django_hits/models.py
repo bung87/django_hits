@@ -11,8 +11,9 @@ else:
     from django.db.transaction import commit_manually as atomic
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction,IntegrityError
-from datetime import datetime, timedelta
-
+from datetime import timedelta
+from django.utils import timezone
+now = timezone.now
 from django.db.models import signals
 
 
@@ -89,10 +90,10 @@ class Hit(models.Model):
             return False
 
     def update_hit_from(self, user, ip):
-        self.log.filter(user=user, ip=ip).update(when=datetime.now())
+        self.log.filter(user=user, ip=ip).update(when=now())
 
     def clear_log(self):
-        timespan = datetime.now() - timedelta(days=30)
+        timespan = now() - timedelta(days=30)
         for l in self.log.filter(when__lt=timespan).order_by('-when')[25:]:
             l.delete()
 
@@ -104,7 +105,7 @@ class HitLog(models.Model):
     hit = models.ForeignKey(Hit, related_name='log')
     user = models.ForeignKey(User, related_name='hits_log', null=True)
     ip = models.GenericIPAddressField(null=True) if hasattr(models,"GenericIPAddressField") else models.IPAddressField(null=True) 
-    when = models.DateTimeField(default=datetime.now)
+    when = models.DateTimeField(default=now)
 
     class Meta:
         unique_together = (('hit', 'user', 'ip'),)
@@ -112,7 +113,7 @@ class HitLog(models.Model):
 
 class HitHistory(models.Model):
     hit = models.ForeignKey(Hit, related_name='history')
-    when = models.DateTimeField(default=datetime.now)
+    when = models.DateTimeField(default=now)
 
     views = models.PositiveIntegerField(default=0)
     visits = models.PositiveIntegerField(default=0)

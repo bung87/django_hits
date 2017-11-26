@@ -3,6 +3,8 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.utils import timezone
+now = timezone.now
 
 class Migration(SchemaMigration):
     
@@ -24,7 +26,7 @@ class Migration(SchemaMigration):
         # Adding model 'HitLog'
         db.create_table('django_hits_hitlog', (
             ('ip', self.gf('django.db.models.fields.IPAddressField')(max_length=15, null=True)),
-            ('when', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
+            ('when', self.gf('django.db.models.fields.DateTimeField')(default=now)),
             ('hit', self.gf('django.db.models.fields.related.ForeignKey')(related_name='log', to=orm['django_hits.Hit'])),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='hits_log', null=True, to=orm['auth.User'])),
@@ -66,7 +68,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -74,7 +76,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -101,7 +103,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ip': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hits_log'", 'null': 'True', 'to': "orm['auth.User']"}),
-            'when': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
+            'when': ('django.db.models.fields.DateTimeField', [], {'default': 'django.utils.timezone.now'})
         }
     }
     
