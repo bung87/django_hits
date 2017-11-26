@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.contrib.auth.models import User
 import django
 if (hasattr(django,"version") and django.version > 1.8) or (hasattr(django,"get_version") and django.get_version()):
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -15,11 +14,10 @@ from datetime import timedelta
 from django.utils import timezone
 now = timezone.now
 from django.db.models import signals
-
+from django.conf import settings
 
 class HitManager(models.Manager):
     def get_for(self, obj, bucket=None):
-
         if bucket is None:
             bucket_kwargs = {'bucket__isnull': True}
         else:
@@ -57,30 +55,26 @@ class Hit(models.Model):
 
     objects = HitManager()
 
-    # TODO: Transaction-Management needed?
-    # @atomic
     def hit(self, user, ip):
-
-        if self.has_hit_from(user, ip):
-            self.update_hit_from(user, ip)
-            Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1)
-            self.views += 1
-            # transaction.commit()
-            return True
         try:
-            self.log.create(user=user, ip=ip)
-        except IntegrityError as e: # catch race condition
-            raise e
+            with transaction.atomic():
+                if self.has_hit_from(user, ip):
+                    self.update_hit_from(user, ip)
+                    Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1)
+                    self.views += 1
+                    return True
+                else:
+                    self.log.create(user=user, ip=ip)
+                    Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1, visits=models.F('visits') + 1)
+                    self.views += 1
+                    self.visits += 1
+                    return True
+        except IntegrityError:
+            # CATCH RACE CONDITION
             # log-extry was already created
             # happens when users double-click or reload to fast
             # (we ignore this)
-            # transaction.rollback()
             return False
-        Hit.objects.filter(pk=self.pk).update(views=models.F('views') + 1, visits=models.F('visits') + 1)
-        self.views += 1
-        self.visits += 1
-        # transaction.commit()
-        return True
 
     def has_hit_from(self, user, ip):
         self.clear_log()
@@ -103,7 +97,7 @@ class Hit(models.Model):
 
 class HitLog(models.Model):
     hit = models.ForeignKey(Hit, related_name='log')
-    user = models.ForeignKey(User, related_name='hits_log', null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='hits_log', null=True)
     ip = models.GenericIPAddressField(null=True) if hasattr(models,"GenericIPAddressField") else models.IPAddressField(null=True) 
     when = models.DateTimeField(default=now)
 

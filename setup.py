@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "django_hits",
-    version = "0.2.1",
+    version = "0.4.1",
     description = 'Count visitors/views for your page',
     author = 'David Danier',
     author_email = 'david.danier@team23.de',
@@ -12,9 +12,11 @@ setup(
         'django_hits',
         'django_hits.south_migrations',
         'django_hits.templatetags',
+        'django_hits.management',
+        'django_hits.management.commands',
     ],
     install_requires = [
-        'Django >=1.3',
+        'Django >=1.6',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
